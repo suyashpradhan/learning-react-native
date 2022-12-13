@@ -2,17 +2,33 @@
 
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Button, FlatList, StyleSheet, Text, View } from 'react-native';
+import {
+	ActivityIndicator,
+	Button,
+	FlatList,
+	Platform,
+	SafeAreaView,
+	StyleSheet,
+	Text,
+	View,
+} from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function App() {
 	const [data, setData] = useState([]);
-	const [isLoading, setIsLoading] = useState('');
+	const [isLoading, setIsLoading] = useState(false);
 
-	const fetchData = () => {
-		return fetch('https://reactnative.dev/movies.json')
-			.then((response) => response.json())
-			.then((json) => setData(json.movies))
-			.catch((e) => console.log(e));
+	const fetchData = async () => {
+		setIsLoading(true);
+		try {
+			const data = await fetch('https://reactnative.dev/movies.json');
+			const json = await data.json();
+			setData(json.movies);
+			setIsLoading(false);
+		} catch (error) {
+			setIsLoading(false);
+			console.log(error);
+		}
 	};
 
 	useEffect(() => {
@@ -22,15 +38,15 @@ export default function App() {
 	return (
 		<View style={styles.container}>
 			<StatusBar style='auto' />
-			<Text>Fetching Data</Text>
+			<Text style={styles.title}>Networking</Text>
 			{isLoading ? (
 				<ActivityIndicator />
 			) : (
 				<FlatList
 					data={data}
-					keyExtractor={({ id }, index) => id}
+					keyExtractor={({ id }) => id}
 					renderItem={({ item }) => (
-						<Text>
+						<Text style={styles.subtitle}>
 							{item.title}, {item.releaseYear}
 						</Text>
 					)}
@@ -43,8 +59,15 @@ export default function App() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: '#fff',
-		alignItems: 'center',
-		justifyContent: 'center',
+		paddingTop: 45,
+		paddingLeft: 18,
+	},
+	title: {
+		fontSize: 28,
+		fontWeight: 'bold',
+		paddingVertical: 12,
+	},
+	subtitle: {
+		fontSize: 20,
 	},
 });
